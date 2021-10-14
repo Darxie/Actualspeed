@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<skin>
+    <map>
+        <settings>
+            <object name="vehicle.main" type="C3DMapMarkSettings">
+                <height_above_ground value="2.0"/>
+                <scale value="0.115"/>
+                <min_scale value="0.110"/>
+                <max_globe_scale value="0.120"/>
+                <scaling_curve value="map/settings/curves/vehicle.scaling.main"/>
+                <rotation>
+                    <x value="0.000000"/>
+                    <y value="0.000000"/>
+                </rotation>
+            </object>
+        </settings>
+    </map>
+</skin>

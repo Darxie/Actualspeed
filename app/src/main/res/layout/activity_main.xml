@@ -9,42 +9,105 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/speed"
+        android:id="@+id/street"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="#CDCDCD"
-        android:textSize="100sp"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="visible" />
-
-    <TextView
-        android:id="@+id/streetView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Street will be shown here"
+        android:fontFamily="sans-serif-medium"
+        android:text="@string/street_will_be_shown_here"
+        android:textAlignment="center"
         android:textColor="#CDCDCD"
         android:textSize="25sp"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@id/speed"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.073"
         tools:visibility="visible" />
 
-    <fragment
-        android:id="@+id/fragment_container"
-        android:name="com.sygic.sdk.map.MapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        app:layout_constraintBottom_toBottomOf="@id/speed"
+    <TextView
+        android:id="@+id/junction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:textColor="#CDCDCD"
+        android:textSize="25sp"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/street"
+        app:layout_constraintVertical_bias="0.01999998"
+        tools:visibility="visible" />
+
+    <TextView
+        android:id="@+id/speed"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:elevation="2dp"
+        android:fontFamily="sans-serif-medium"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textSize="35sp"
+        android:textStyle="bold"
+        android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@+id/speedLimit"
+        app:layout_constraintEnd_toEndOf="@+id/currentSpeedImage"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/currentSpeedImage"
+        app:layout_constraintTop_toTopOf="@+id/currentSpeedImage"
         app:layout_constraintVertical_bias="0.0"
-        tools:layout="@layout/sygic_sdk_activity_map" />
+        tools:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/speedLimitImage"
+        android:layout_width="88dp"
+        android:layout_height="79dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="224dp"
+        android:contentDescription="@string/speedlimit_image"
+        android:elevation="2dp"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/sygic_sdk_speed_limit_eu" />
+
+    <TextView
+        android:id="@+id/speedLimit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:elevation="3dp"
+        android:fontFamily="sans-serif-medium"
+        android:textColor="#000000"
+        android:textSize="30sp"
+        app:layout_constraintBottom_toBottomOf="@+id/speedLimitImage"
+        app:layout_constraintEnd_toEndOf="@+id/speedLimitImage"
+        app:layout_constraintStart_toStartOf="@+id/speedLimitImage"
+        app:layout_constraintTop_toTopOf="@+id/speedLimitImage" />
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/mapFragment"
+        android:name="com.sygic.sdk.map.MapFragment"
+        android:layout_width="412dp"
+        android:layout_height="263dp"
+        android:elevation="1dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/junction"
+        app:layout_constraintVertical_bias="0.976" />
+
+    <ImageView
+        android:id="@+id/currentSpeedImage"
+        android:layout_width="60dp"
+        android:layout_height="51dp"
+        android:contentDescription="@string/text"
+        app:layout_constraintBottom_toTopOf="@+id/speedLimit"
+        app:layout_constraintEnd_toEndOf="@+id/speedLimitImage"
+        app:layout_constraintHorizontal_bias="0.486"
+        app:layout_constraintStart_toStartOf="@+id/speedLimitImage"
+        app:srcCompat="@android:drawable/progress_horizontal" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

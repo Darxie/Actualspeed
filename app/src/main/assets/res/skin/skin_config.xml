@@ -1,0 +1,21 @@
+<skin>
+    <searching policy="depth" memo="options: depth, breadth"/>
+    <json name="poi_categories_intern" set="default" file="skin_poi_intern.json" memo="intern POI categories configuration"/>
+    <json name="poi_categories_custom" set="default" file="skin_poi_custom.json" writable="true" memo="custom POI categories configuration"/>
+    <json name="poi_categories_intern" set="car" file="skin_poi_intern_car.json" writable="false" memo="POI groups for car mode"/>
+    <set name="roadsigns" hidden="true" file="skin_roadsigns.xml" memo="Roadsigns"/>
+    <set name="default_depr" parent="roadsigns" file="skin_default.xml" memo="default with all resources for a day"/>
+    <set name="low_performance" file="skin_low_performance.xml"/>
+    <set name="day" file="skin_day.xml" memo="no special resources"/>
+    <set name="night" file="skin_night.xml"/>
+    <set name="default" parent="default_depr" file="skin_moj.xml" memo="mensia sipocka"/>
+    <set name="car" file="skin_car.xml"/>
+    <set name="car_no_signal" parent="car" file="skin_car_no_signal.xml"/>
+    <set name="car_custom" file="skin_car_custom.xml"/>
+    <set name="pedestrian" file="skin_pedestrian.xml"/>
+    <set name="pedestrian_no_signal" parent="pedestrian" file="skin_pedestrian_no_signal.xml"/>
+    <set name="navigation" file="skin_navigation.xml"/>
+    <set name="browse" file="skin_browse.xml"/>
+    <set name="scout" file="skin_scout.xml"/>
+    <set name="realview" file="skin_realview.xml"/>
+</skin>
