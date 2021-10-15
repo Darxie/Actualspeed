@@ -15,6 +15,8 @@ class NavigationFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentNavigationBinding.inflate(inflater, container, false)
+        val mapView = super.onCreateView(inflater, container, savedInstanceState)
+        binding.root.addView(mapView, 0)
         return binding.root
     }
 }

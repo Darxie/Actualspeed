@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">Actual speed</string>
     <string name="street_will_be_shown_here">Street will be shown here</string>
+    <string name="junction_will_be_shown_here">Junction will be shown here</string>
     <string name="speedlimit_image">SpeedLimit image</string>
     <string name="text">text</string>
+
+    <string name="current_street">%s \n %s</string>
+    <string name="next_junction">Next junction in %dm</string>
 </resources>
