@@ -98,8 +98,8 @@ class FreeDriveFragmentViewModel : ViewModel() {
         with(cameraDataModel) {
             movementMode = Camera.MovementMode.FollowGpsPosition
             rotationMode = Camera.RotationMode.Vehicle
-            tilt = 30f
-            zoomLevel = 16f
+            tilt = 90F
+            zoomLevel = 14F
         }
     }
 }

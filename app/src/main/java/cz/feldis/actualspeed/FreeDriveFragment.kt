@@ -36,16 +36,16 @@ class FreeDriveFragment : MapFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.speed.setOnClickListener { viewModel.resetCamera() }
+        binding.speedInfoLayout.speed.setOnClickListener { viewModel.resetCamera() }
 
         viewModel.currentSpeedText.observe(viewLifecycleOwner, {
-            binding.speed.text = it
+            binding.speedInfoLayout.speed.text = it
         })
         viewModel.currentSpeedColor.observe(viewLifecycleOwner, {
-            binding.currentSpeedImage.setColorFilter(it)
+            binding.speedInfoLayout.currentSpeedImage.setColorFilter(it)
         })
         viewModel.speedLimitText.observe(viewLifecycleOwner, {
-            binding.speedLimit.text = it
+            binding.speedInfoLayout.speedLimit.text = it
         })
         viewModel.currentStreetInfo.observe(viewLifecycleOwner, {
             binding.street.text = getString(R.string.current_street, it.street, it.city)
