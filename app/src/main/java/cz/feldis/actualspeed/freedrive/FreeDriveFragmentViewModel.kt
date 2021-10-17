@@ -1,4 +1,4 @@
-package cz.feldis.actualspeed.viewmodel
+package cz.feldis.actualspeed.freedrive
 
 import android.graphics.Color
 import androidx.lifecycle.LiveData
@@ -81,25 +81,30 @@ class FreeDriveFragmentViewModel : ViewModel() {
     }
 
     private fun initMapDataModel() {
-        with(mapDataModel) {
-            skin = listOf("night")
-            setMapLayerCategoryVisibility(MapView.MapLayerCategory.Sky, false)
-            setMapLayerCategoryVisibility(MapView.MapLayerCategory.Terrain, false)
-            setMapLayerCategoryVisibility(MapView.MapLayerCategory.Areas, false)
-            setMapLayerCategoryVisibility(MapView.MapLayerCategory.Pois, false)
-            setMapLayerCategoryVisibility(MapView.MapLayerCategory.CityMaps, false)
-            setMapLayerCategoryVisibility(MapView.MapLayerCategory.Landmarks, false)
-            setMapLayerCategoryVisibility(MapView.MapLayerCategory.LabelCityCenters, false)
-            setMapLayerCategoryVisibility(MapView.MapLayerCategory.LabelAddressPoints, false)
+        viewModelScope.launch {
+            with(mapDataModel) {
+                skin = listOf("night")
+                setMapLayerCategoryVisibility(MapView.MapLayerCategory.Sky, false)
+                setMapLayerCategoryVisibility(MapView.MapLayerCategory.Terrain, false)
+                setMapLayerCategoryVisibility(MapView.MapLayerCategory.Areas, false)
+                setMapLayerCategoryVisibility(MapView.MapLayerCategory.Pois, false)
+                setMapLayerCategoryVisibility(MapView.MapLayerCategory.CityMaps, false)
+                setMapLayerCategoryVisibility(MapView.MapLayerCategory.Landmarks, false)
+                setMapLayerCategoryVisibility(MapView.MapLayerCategory.LabelCityCenters, false)
+                setMapLayerCategoryVisibility(MapView.MapLayerCategory.LabelAddressPoints, false)
+            }
         }
     }
 
     fun resetCamera() {
-        with(cameraDataModel) {
-            movementMode = Camera.MovementMode.FollowGpsPosition
-            rotationMode = Camera.RotationMode.Vehicle
-            tilt = 90F
-            zoomLevel = 14F
+        viewModelScope.launch {
+            with(cameraDataModel) {
+                movementMode = Camera.MovementMode.FollowGpsPosition
+                rotationMode = Camera.RotationMode.Vehicle
+                tilt = 90F
+                zoomLevel = 14F
+                position = positionManagerKtx.lastKnownPosition().coordinates
+            }
         }
     }
 }

@@ -4,11 +4,26 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".FreeDriveFragment">
+    tools:context=".freedrive.FreeDriveFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabSearch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            app:fabSize="normal"
+            app:borderWidth="0dp"
+            android:backgroundTint="#ff5a5d5a"
+            app:maxImageSize="35dp"
+            android:contentDescription="@string/fab_search"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:src="@drawable/ic_search_24"
+            tools:src="@drawable/ic_search_24"/>
 
         <TextView
             android:id="@+id/street"

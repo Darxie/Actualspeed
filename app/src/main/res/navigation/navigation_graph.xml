@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/freeDriveFragment"
-        android:name="cz.feldis.actualspeed.FreeDriveFragment"
+        android:name="cz.feldis.actualspeed.freedrive.FreeDriveFragment"
         android:label="fragment_free_drive"
         tools:layout="@layout/fragment_free_drive" >
         <action
@@ -16,7 +16,7 @@
     </fragment>
     <fragment
         android:id="@+id/navigationFragment"
-        android:name="cz.feldis.actualspeed.NavigationFragment"
+        android:name="cz.feldis.actualspeed.navigation.NavigationFragment"
         android:label="fragment_navigation"
         tools:layout="@layout/fragment_navigation" >
         <action
@@ -25,11 +25,20 @@
     </fragment>
     <fragment
         android:id="@+id/searchFragment"
-        android:name="cz.feldis.actualspeed.SearchFragment"
+        android:name="cz.feldis.actualspeed.search.SearchFragment"
         android:label="fragment_search_list"
         tools:layout="@layout/fragment_search" >
         <action
-            android:id="@+id/action_searchFragment_to_navigationFragment"
+            android:id="@+id/action_searchFragment_to_searchResultFragment"
+            app:destination="@id/searchResultFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/searchResultFragment"
+        android:name="cz.feldis.actualspeed.search.SearchResultFragment"
+        android:label="fragment_search_result"
+        tools:layout="@layout/fragment_search_result" >
+        <action
+            android:id="@+id/action_searchResultFragment_to_navigationFragment"
             app:destination="@id/navigationFragment" />
     </fragment>
 </navigation>

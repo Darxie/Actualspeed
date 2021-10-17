@@ -7,4 +7,9 @@
 
     <string name="current_street">%s \n %s</string>
     <string name="next_junction">Next junction in %dm</string>
+    <string name="fab_search">FAB Search</string>
+    <string name="tap_to_search">Tap to search</string>
+    <string name="search_hint">What do you want to search?</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

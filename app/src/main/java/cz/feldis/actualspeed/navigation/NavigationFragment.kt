@@ -1,13 +1,13 @@
-package cz.feldis.actualspeed
+package cz.feldis.actualspeed.navigation
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.sygic.sdk.map.MapFragment
 import cz.feldis.actualspeed.databinding.FragmentNavigationBinding
 
-class NavigationFragment : Fragment() {
+class NavigationFragment : MapFragment() {
     private lateinit var binding: FragmentNavigationBinding
 
     override fun onCreateView(

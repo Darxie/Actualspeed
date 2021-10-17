@@ -1,15 +1,16 @@
-package cz.feldis.actualspeed
+package cz.feldis.actualspeed.freedrive
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.sygic.sdk.map.Camera
 import com.sygic.sdk.map.MapFragment
 import com.sygic.sdk.map.MapView
+import cz.feldis.actualspeed.R
 import cz.feldis.actualspeed.databinding.FragmentFreeDriveBinding
-import cz.feldis.actualspeed.viewmodel.FreeDriveFragmentViewModel
 
 class FreeDriveFragment : MapFragment() {
     private lateinit var binding: FragmentFreeDriveBinding
@@ -37,6 +38,7 @@ class FreeDriveFragment : MapFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.speedInfoLayout.speed.setOnClickListener { viewModel.resetCamera() }
+        binding.fabSearch.setOnClickListener { findNavController().navigate(R.id.action_freeDriveFragment_to_searchFragment) }
 
         viewModel.currentSpeedText.observe(viewLifecycleOwner, {
             binding.speedInfoLayout.speed.text = it
