@@ -6,11 +6,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sygic.sdk.map.Camera
+import com.sygic.sdk.map.MapAnimation
 import com.sygic.sdk.map.MapView
 import com.sygic.sdk.map.data.SimpleCameraDataModel
 import com.sygic.sdk.map.data.SimpleMapDataModel
 import com.sygic.sdk.navigation.StreetDetail
 import com.sygic.sdk.navigation.StreetInfo
+import com.sygic.sdk.navigation.routeeventnotifications.SpeedLimitInfo
+import com.sygic.sdk.position.GeoPosition
 import cz.feldis.actualspeed.ktx.navigation.CurrentStreetDetailException
 import cz.feldis.actualspeed.ktx.navigation.NavigationManagerKtx
 import cz.feldis.actualspeed.ktx.position.PositionManagerKtx
@@ -50,31 +53,13 @@ class FreeDriveFragmentViewModel : ViewModel() {
     private fun initManagers() {
         viewModelScope.launch {
             launch {
-                positionManagerKtx.positions().collect { geoPosition ->
-                    currentSpeedTextMutable.postValue(geoPosition.speed.toInt().toString())
-                    if (geoPosition.speed > currentSpeedLimit + 5f) {
-                        currentSpeedColorMutable.postValue(Color.RED)
-                    } else {
-                        currentSpeedColorMutable.postValue(Color.GRAY)
-                    }
-                }
+                positionManagerKtx.positions().collect { handlePosition(it) }
             }
             launch {
-                navigationManagerKtx.speedLimits().collect { speedLimitInfo ->
-                    currentSpeedLimit = speedLimitInfo.speedLimit
-                    speedLimitTextMutable.postValue(currentSpeedLimit.toInt().toString())
-                }
+                navigationManagerKtx.speedLimits().collect { handleSpeedLimitInfo(it) }
             }
             launch {
-                navigationManagerKtx.street().collect { streetInfo ->
-                    currentStreetInfoMutable.postValue(streetInfo)
-                    try {
-                        val streetDetail = navigationManagerKtx.currentStreetDetail()
-                        currentStreetDetailMutable.postValue(streetDetail)
-                    } catch (exception: CurrentStreetDetailException) {
-                        println(exception.message)
-                    }
-                }
+                navigationManagerKtx.street().collect { handleStreetInfo(it) }
             }
             positionManagerKtx.startPositionUpdating()
         }
@@ -105,6 +90,38 @@ class FreeDriveFragmentViewModel : ViewModel() {
                 zoomLevel = 14F
                 position = positionManagerKtx.lastKnownPosition().coordinates
             }
+        }
+    }
+
+    private fun handlePosition(geoPosition: GeoPosition) {
+        currentSpeedTextMutable.postValue(geoPosition.speed.toInt().toString())
+        if (geoPosition.speed > currentSpeedLimit + 5f) {
+            currentSpeedColorMutable.postValue(Color.RED)
+        } else {
+            currentSpeedColorMutable.postValue(Color.GRAY)
+        }
+    }
+
+    private fun handleSpeedLimitInfo(speedLimitInfo: SpeedLimitInfo) {
+        currentSpeedLimit = speedLimitInfo.speedLimit
+        cameraDataModel.setZoomLevel(
+            if (speedLimitInfo.isInMunicipality()) {
+                17F
+            } else {
+                15.5F
+            },
+            MapAnimation(500L, MapAnimation.InterpolationCurve.AccelerateDecelerate)
+        )
+        speedLimitTextMutable.postValue(currentSpeedLimit.toInt().toString())
+    }
+
+    private suspend fun handleStreetInfo(streetInfo: StreetInfo) {
+        currentStreetInfoMutable.postValue(streetInfo)
+        try {
+            val streetDetail = navigationManagerKtx.currentStreetDetail()
+            currentStreetDetailMutable.postValue(streetDetail)
+        } catch (exception: CurrentStreetDetailException) {
+            println(exception.message)
         }
     }
 }
