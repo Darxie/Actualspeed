@@ -1,6 +1,7 @@
-package cz.feldis.actualspeed.freedrive
+package cz.feldis.actualspeed.drive
 
 import android.graphics.Color
+import android.view.View
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,22 +9,30 @@ import androidx.lifecycle.viewModelScope
 import com.sygic.sdk.map.Camera
 import com.sygic.sdk.map.MapAnimation
 import com.sygic.sdk.map.MapView
+import com.sygic.sdk.map.`object`.MapRoute
 import com.sygic.sdk.map.data.SimpleCameraDataModel
-import com.sygic.sdk.map.data.SimpleMapDataModel
 import com.sygic.sdk.navigation.StreetDetail
 import com.sygic.sdk.navigation.StreetInfo
 import com.sygic.sdk.navigation.routeeventnotifications.SpeedLimitInfo
+import com.sygic.sdk.position.GeoCoordinates
 import com.sygic.sdk.position.GeoPosition
+import com.sygic.sdk.route.PrimaryRouteRequest
+import com.sygic.sdk.route.RouteRequest
 import cz.feldis.actualspeed.ktx.navigation.CurrentStreetDetailException
 import cz.feldis.actualspeed.ktx.navigation.NavigationManagerKtx
 import cz.feldis.actualspeed.ktx.position.PositionManagerKtx
+import cz.feldis.actualspeed.ktx.routing.RouteSimulatorKtx
+import cz.feldis.actualspeed.ktx.routing.RouterKtx
+import cz.feldis.actualspeed.utils.RouteComputeListenerWrapper
+import cz.feldis.actualspeed.utils.SignalingLiveData
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-class FreeDriveFragmentViewModel : ViewModel() {
+class DriveFragmentViewModel : ViewModel() {
 
     private val positionManagerKtx = PositionManagerKtx()
     private val navigationManagerKtx = NavigationManagerKtx()
+    private val routerKtx = RouterKtx()
     private var currentSpeedLimit = 0f
 
     private val currentStreetDetailMutable = MutableLiveData<StreetDetail>()
@@ -41,7 +50,10 @@ class FreeDriveFragmentViewModel : ViewModel() {
     private val speedLimitTextMutable = MutableLiveData<String>()
     val speedLimitText: LiveData<String> = speedLimitTextMutable
 
-    val mapDataModel = SimpleMapDataModel()
+    private val simulateButtonVisibleSignal = SignalingLiveData<Boolean>()
+    val simulateButtonVisible: LiveData<Boolean> = simulateButtonVisibleSignal
+
+    val mapDataModel = DriveMapDataModel()
     val cameraDataModel = SimpleCameraDataModel()
 
     init {
@@ -89,6 +101,35 @@ class FreeDriveFragmentViewModel : ViewModel() {
                 tilt = 90F
                 zoomLevel = 14F
                 position = positionManagerKtx.lastKnownPosition().coordinates
+            }
+        }
+    }
+
+    fun navigateTo(geoCoordinates: GeoCoordinates) {
+        viewModelScope.launch {
+            val routeRequest = RouteRequest().apply {
+                setStart(positionManagerKtx.lastKnownPosition().coordinates)
+                setDestination(geoCoordinates)
+            }
+
+            val route = routerKtx.calculateRouteWithAlternatives(
+                PrimaryRouteRequest(
+                    routeRequest,
+                    RouteComputeListenerWrapper()
+                )
+            )
+            route?.let {
+                navigationManagerKtx.setRouteForNavigation(it)
+                mapDataModel.setPrimaryRoute(it)
+                simulateButtonVisibleSignal.postValue(true)
+            }
+        }
+    }
+
+    fun simulate() {
+        viewModelScope.launch {
+            navigationManagerKtx.getCurrentRoute()?.let {
+                RouteSimulatorKtx().provideSimulator(it).start()
             }
         }
     }

@@ -2,6 +2,7 @@ package cz.feldis.actualspeed.ktx.navigation
 
 import com.sygic.sdk.navigation.*
 import com.sygic.sdk.navigation.routeeventnotifications.SpeedLimitInfo
+import com.sygic.sdk.route.Route
 import cz.feldis.actualspeed.ktx.SdkManagerKtx
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -48,4 +49,7 @@ class NavigationManagerKtx :
             manager.getCurrentStreetDetail(listener)
         }
     }
+
+    suspend fun setRouteForNavigation(route: Route) = manager().setRouteForNavigation(route)
+    suspend fun getCurrentRoute(): Route? = manager().currentRoute
 }

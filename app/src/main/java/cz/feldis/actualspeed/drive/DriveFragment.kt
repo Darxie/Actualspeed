@@ -1,26 +1,42 @@
-package cz.feldis.actualspeed.freedrive
+package cz.feldis.actualspeed.drive
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.activityViewModels
+import androidx.core.view.isVisible
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.sygic.sdk.map.Camera
 import com.sygic.sdk.map.MapFragment
 import com.sygic.sdk.map.MapView
+import com.sygic.sdk.position.GeoCoordinates
 import cz.feldis.actualspeed.R
-import cz.feldis.actualspeed.databinding.FragmentFreeDriveBinding
+import cz.feldis.actualspeed.databinding.FragmentDriveBinding
 
-class FreeDriveFragment : MapFragment() {
-    private lateinit var binding: FragmentFreeDriveBinding
-    private val viewModel: FreeDriveFragmentViewModel by activityViewModels()
+class DriveFragment : MapFragment() {
+    companion object {
+        const val ARG_DESTINATION = "arg_destination"
+    }
+
+    private lateinit var binding: FragmentDriveBinding
+    private val viewModel: DriveFragmentViewModel by viewModels()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            val destination: GeoCoordinates? = it.getParcelable(ARG_DESTINATION)
+            destination?.let {
+                viewModel.navigateTo(destination)
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentFreeDriveBinding.inflate(inflater, container, false)
+        binding = FragmentDriveBinding.inflate(inflater, container, false)
         val mapView = super.onCreateView(inflater, binding.mapFrameLayout, savedInstanceState)
         binding.mapFrameLayout.addView(mapView, 0)
         return binding.root
@@ -38,8 +54,12 @@ class FreeDriveFragment : MapFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.speedInfoLayout.speed.setOnClickListener { viewModel.resetCamera() }
-        binding.fabSearch.setOnClickListener { findNavController().navigate(R.id.action_freeDriveFragment_to_searchFragment) }
+        binding.fabSearch.setOnClickListener { findNavController().navigate(R.id.action_driveFragment_to_searchFragment) }
+        binding.fabSimulation.setOnClickListener { viewModel.simulate() }
 
+        viewModel.simulateButtonVisible.observe(viewLifecycleOwner, {
+            if (it == true) binding.fabSimulation.show() else binding.fabSimulation.hide()
+        })
         viewModel.currentSpeedText.observe(viewLifecycleOwner, {
             binding.speedInfoLayout.speed.text = it
         })

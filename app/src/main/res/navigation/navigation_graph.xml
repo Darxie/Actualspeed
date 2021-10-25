@@ -3,25 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/navigation_graph"
-    app:startDestination="@id/freeDriveFragment">
+    app:startDestination="@id/driveFragment">
 
     <fragment
-        android:id="@+id/freeDriveFragment"
-        android:name="cz.feldis.actualspeed.freedrive.FreeDriveFragment"
-        android:label="fragment_free_drive"
-        tools:layout="@layout/fragment_free_drive" >
+        android:id="@+id/driveFragment"
+        android:name="cz.feldis.actualspeed.drive.DriveFragment"
+        android:label="fragment_drive"
+        tools:layout="@layout/fragment_drive" >
         <action
-            android:id="@+id/action_freeDriveFragment_to_searchFragment"
+            android:id="@+id/action_driveFragment_to_searchFragment"
             app:destination="@id/searchFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/navigationFragment"
-        android:name="cz.feldis.actualspeed.navigation.NavigationFragment"
-        android:label="fragment_navigation"
-        tools:layout="@layout/fragment_navigation" >
-        <action
-            android:id="@+id/action_navigationFragment_to_freeDriveFragment"
-            app:destination="@id/freeDriveFragment" />
     </fragment>
     <fragment
         android:id="@+id/searchFragment"
@@ -38,7 +29,9 @@
         android:label="fragment_search_result"
         tools:layout="@layout/fragment_search_result" >
         <action
-            android:id="@+id/action_searchResultFragment_to_navigationFragment"
-            app:destination="@id/navigationFragment" />
+            android:id="@+id/action_searchResultFragment_to_driveFragment"
+            app:destination="@id/driveFragment"
+            app:popUpTo="@id/driveFragment"
+            app:popUpToInclusive="true"/>
     </fragment>
 </navigation>
