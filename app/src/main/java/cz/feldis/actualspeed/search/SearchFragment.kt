@@ -10,6 +10,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import cz.feldis.actualspeed.R
 import cz.feldis.actualspeed.databinding.FragmentSearchBinding
+import cz.feldis.actualspeed.utils.hideKb
 
 class SearchFragment : Fragment() {
 
@@ -37,6 +38,7 @@ class SearchFragment : Fragment() {
             (binding.searchResults.adapter as SearchRecyclerViewAdapter).setData(it)
         })
         viewModel.showSearchResult.observe(viewLifecycleOwner, {
+            hideKb()
             val args = Bundle().apply {
                 putParcelable(SearchResultFragment.ARG_SEARCH_RESULT, it)
             }
