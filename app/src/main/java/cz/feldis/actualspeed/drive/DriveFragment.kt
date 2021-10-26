@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.sygic.sdk.map.Camera
@@ -54,12 +54,19 @@ class DriveFragment : MapFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.speedInfoLayout.speed.setOnClickListener { viewModel.resetCamera() }
-        binding.fabSimulation.setOnLongClickListener { mapDataModel.setMapLayerCategoryVisibility(MapView.MapLayerCategory.Debug, true) } // toto nefunguje
+        binding.fabSimulation.setOnLongClickListener { viewModel.enableDebugLayer() }
         binding.fabSearch.setOnClickListener { findNavController().navigate(R.id.action_driveFragment_to_searchFragment) }
         binding.fabSimulation.setOnClickListener { viewModel.simulate() }
+        binding.fabStopNavigation.setOnClickListener { viewModel.stopNavigation() }
 
         viewModel.simulateButtonVisible.observe(viewLifecycleOwner, {
             if (it == true) binding.fabSimulation.show() else binding.fabSimulation.hide()
+        })
+        viewModel.simulateButtonIcon.observe(viewLifecycleOwner, {
+            binding.fabSimulation.setImageDrawable(AppCompatResources.getDrawable(requireContext(), it))
+        })
+        viewModel.stopNavigationButtonVisible.observe(viewLifecycleOwner, {
+            if (it == true) binding.fabStopNavigation.show() else binding.fabStopNavigation.hide()
         })
         viewModel.currentSpeedText.observe(viewLifecycleOwner, {
             binding.speedInfoLayout.speed.text = it
