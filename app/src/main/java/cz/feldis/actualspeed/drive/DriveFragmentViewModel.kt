@@ -205,10 +205,10 @@ class DriveFragmentViewModel : ViewModel() {
     private fun handleTrajectory(trajectory: Trajectory?) {
         do {
             trajectory?.advance()?.apply {
-                Log.d("TRAJECTORY", "Point distanceFromStart:$distanceFromStart angle:$angle")
                 if (distanceFromStart > TrajectorySearchDistance) {
                     return
                 }
+                Log.d("TRAJECTORY", "Point distanceFromStart:$distanceFromStart angle:$angle")
             } ?: return
         } while (true)
     }
