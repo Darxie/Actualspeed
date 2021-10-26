@@ -13,4 +13,7 @@
     <string name="fab_stop_navigation">FAB Stop Navigation</string>
     <string name="tap_to_search">Tap to search</string>
     <string name="search_hint">What do you want to search?</string>
+    <string name="use_unpaved_roads">Use unpaved roads</string>
+    <string name="use_fastest_route">Use fastest rotue</string>
+    <string name="avoid_tollroads">Avoid tollroads</string>
 </resources>

@@ -1,6 +1,7 @@
 package cz.feldis.actualspeed.search
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sygic.sdk.map.Camera
@@ -8,13 +9,12 @@ import com.sygic.sdk.map.MapView
 import com.sygic.sdk.map.`object`.MapMarker
 import com.sygic.sdk.map.data.SimpleCameraDataModel
 import com.sygic.sdk.map.data.SimpleMapDataModel
-import com.sygic.sdk.position.GeoCoordinates
 import com.sygic.sdk.search.GeocodingResult
+import cz.feldis.actualspeed.drive.NavigateOptions
 import cz.feldis.actualspeed.utils.SignalingLiveData
 import kotlinx.coroutines.launch
 
 class SearchResultFragmentViewModel : ViewModel() {
-
     private lateinit var geocodingResult: GeocodingResult
     val mapDataModel = SimpleMapDataModel()
     val cameraDataModel = SimpleCameraDataModel()
@@ -25,12 +25,40 @@ class SearchResultFragmentViewModel : ViewModel() {
     private val resultSubtitleSignal = SignalingLiveData<String>()
     val resultSubtitle: LiveData<String> = resultSubtitleSignal
 
-    private val navigateToSignal = SignalingLiveData<GeoCoordinates>()
-    val navigateTo: LiveData<GeoCoordinates> = navigateToSignal
+    private val navigateToSignal = SignalingLiveData<NavigateOptions>()
+    val navigateTo: LiveData<NavigateOptions> = navigateToSignal
+
+    private val fastestRouteSignal = MutableLiveData<Boolean>()
+    val fastestRoute: LiveData<Boolean> = fastestRouteSignal
+
+    private val avoidTollRoadsSignal = MutableLiveData<Boolean>()
+    val avoidTollRoads: LiveData<Boolean> = avoidTollRoadsSignal
+
+    private val useUnpavedRoadsSignal = MutableLiveData<Boolean>()
+    val useUnpavedRoads: LiveData<Boolean> = useUnpavedRoadsSignal
 
     init {
         initMapDataModel()
         resetCamera()
+        initRoutingOptions()
+    }
+
+    private fun initRoutingOptions() {
+        fastestRouteSignal.postValue(true)
+        avoidTollRoadsSignal.postValue(false)
+        useUnpavedRoadsSignal.postValue(false)
+    }
+
+    fun setFastestRoute(useFastestRoute: Boolean) {
+        fastestRouteSignal.postValue(useFastestRoute)
+    }
+
+    fun setAvoidTollRoads(avoidTollRoads: Boolean) {
+        avoidTollRoadsSignal.postValue(avoidTollRoads)
+    }
+
+    fun setUseUnpavedRoads(useUnpavedRoads: Boolean) {
+        useUnpavedRoadsSignal.postValue(useUnpavedRoads)
     }
 
     fun showResult(geocodingResult: GeocodingResult) {
@@ -73,6 +101,13 @@ class SearchResultFragmentViewModel : ViewModel() {
     }
 
     fun onNavigateToResultClick() {
-        navigateToSignal.postValue(geocodingResult.location)
+        navigateToSignal.postValue(
+            NavigateOptions(
+                geocodingResult.location,
+                fastestRouteSignal.value ?: true,
+                avoidTollRoadsSignal.value ?: true,
+                useUnpavedRoadsSignal.value ?: true
+            )
+        )
     }
 }

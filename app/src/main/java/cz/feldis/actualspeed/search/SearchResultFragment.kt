@@ -12,7 +12,7 @@ import com.sygic.sdk.map.MapView
 import com.sygic.sdk.search.GeocodingResult
 import cz.feldis.actualspeed.R
 import cz.feldis.actualspeed.databinding.FragmentSearchResultBinding
-import cz.feldis.actualspeed.drive.DriveFragment.Companion.ARG_DESTINATION
+import cz.feldis.actualspeed.drive.DriveFragment.Companion.ARG_NAVIGATE_OPTIONS
 
 class SearchResultFragment : MapFragment() {
     companion object {
@@ -57,13 +57,37 @@ class SearchResultFragment : MapFragment() {
 
         viewModel.navigateTo.observe(viewLifecycleOwner, {
             val bundle = Bundle().apply {
-                putParcelable(ARG_DESTINATION, it)
+                putParcelable(ARG_NAVIGATE_OPTIONS, it)
             }
             findNavController().navigate(R.id.action_searchResultFragment_to_driveFragment, bundle)
         })
         viewModel.resultTitle.observe(viewLifecycleOwner, { binding.resultTitle.text = it })
         viewModel.resultSubtitle.observe(viewLifecycleOwner, { binding.resultSubtitle.text = it })
+        viewModel.fastestRoute.observe(
+            viewLifecycleOwner,
+            { binding.useFastestRouteSwitch.isChecked = it })
+        viewModel.avoidTollRoads.observe(
+            viewLifecycleOwner,
+            { binding.avoidTollRoadsSwitch.isChecked = it })
+        viewModel.useUnpavedRoads.observe(
+            viewLifecycleOwner,
+            { binding.useUnpavedRoadsSwitch.isChecked = it })
 
         binding.fabNavigation.setOnClickListener { viewModel.onNavigateToResultClick() }
+        binding.useFastestRouteSwitch.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.setFastestRoute(
+                isChecked
+            )
+        }
+        binding.avoidTollRoadsSwitch.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.setAvoidTollRoads(
+                isChecked
+            )
+        }
+        binding.useUnpavedRoadsSwitch.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.setUseUnpavedRoads(
+                isChecked
+            )
+        }
     }
 }

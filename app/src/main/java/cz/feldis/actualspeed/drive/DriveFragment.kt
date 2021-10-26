@@ -16,7 +16,7 @@ import cz.feldis.actualspeed.databinding.FragmentDriveBinding
 
 class DriveFragment : MapFragment() {
     companion object {
-        const val ARG_DESTINATION = "arg_destination"
+        const val ARG_NAVIGATE_OPTIONS = "arg_navigate_options"
     }
 
     private lateinit var binding: FragmentDriveBinding
@@ -25,9 +25,9 @@ class DriveFragment : MapFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            val destination: GeoCoordinates? = it.getParcelable(ARG_DESTINATION)
-            destination?.let {
-                viewModel.navigateTo(destination)
+            val navigateOptions: NavigateOptions? = it.getParcelable(ARG_NAVIGATE_OPTIONS)
+            navigateOptions?.let {
+                viewModel.navigateTo(navigateOptions)
             }
         }
     }
