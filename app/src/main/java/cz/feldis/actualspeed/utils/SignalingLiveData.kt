@@ -17,7 +17,7 @@ class SignalingLiveData<T> : MutableLiveData<T> {
     @MainThread
     override fun observe(owner: LifecycleOwner, observer: Observer<in T>) {
         if (hasActiveObservers()) {
-            throw IllegalAccessException("For register multiple observers use MultipleSignalingLiveData.")
+            throw IllegalAccessException("To register multiple observers use MultipleSignalingLiveData.")
         }
         super.observe(owner, { t ->
             if (pending.compareAndSet(true, false)) {

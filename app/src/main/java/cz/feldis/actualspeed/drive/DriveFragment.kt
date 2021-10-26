@@ -54,6 +54,7 @@ class DriveFragment : MapFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.speedInfoLayout.speed.setOnClickListener { viewModel.resetCamera() }
+        binding.fabSimulation.setOnLongClickListener { mapDataModel.setMapLayerCategoryVisibility(MapView.MapLayerCategory.Debug, true) } // toto nefunguje
         binding.fabSearch.setOnClickListener { findNavController().navigate(R.id.action_driveFragment_to_searchFragment) }
         binding.fabSimulation.setOnClickListener { viewModel.simulate() }
 

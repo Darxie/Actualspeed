@@ -1,6 +1,7 @@
 package cz.feldis.actualspeed.ktx.navigation
 
 import com.sygic.sdk.navigation.*
+import com.sygic.sdk.navigation.routeeventnotifications.DirectionInfo
 import com.sygic.sdk.navigation.routeeventnotifications.SpeedLimitInfo
 import com.sygic.sdk.route.Route
 import cz.feldis.actualspeed.ktx.SdkManagerKtx
@@ -32,6 +33,14 @@ class NavigationManagerKtx :
 
         manager.addStreetChangedListener(listener)
         awaitClose { manager.removeStreetChangedListener(listener) }
+    }
+
+    fun direction(): Flow<DirectionInfo> = callbackFlow {
+        val manager = manager()
+        val listener = NavigationManager.OnDirectionListener { launch { send(it) } }
+
+        manager.addOnDirectionListener(listener)
+        awaitClose { manager.removeOnDirectionListener(listener) }
     }
 
     suspend fun currentStreetDetail(): StreetDetail {

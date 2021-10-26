@@ -1,6 +1,33 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <skin>
     <map>
+        <route>
+            <functions>
+                <object name="function.route_width_by_distance" type="CLinearFunction">
+                    <parent type="CFunctionObject">
+                        <definition>
+                            <x value="8.000000"/> <!-- Width in the deepest scale zoom -->
+                            <y value="17000.000000"/> <!-- Width in the highest scale zoom -->
+                            <z value="12.000000"/> <!-- Minumum scale to calculate -->
+                            <w value="1200000.000000"/> <!-- Maximum scale to calculate -->
+                        </definition>
+                    </parent>
+                </object>
+                <object name="function.route_alt_width_by_distance" type="CLinearFunction">
+                    <parent type="CFunctionObject">
+                        <definition>
+                            <x value="7.000000"/>
+                            <y value="12000.000000"/>
+                            <z value="12.000000"/>
+                            <w value="1200000.000000"/>
+                        </definition>
+                    </parent>
+                </object>
+            </functions>
+            <object name="cut_distance_from_vehicle" type="Library::CFloatResource">
+                <float value="0.0"/>
+            </object>
+        </route>
         <settings>
             <object name="vehicle.main" type="C3DMapMarkSettings">
                 <height_above_ground value="2.0"/>
@@ -12,6 +39,54 @@
                     <x value="0.000000"/>
                     <y value="0.000000"/>
                 </rotation>
+            </object>
+            <object name="autozoom" type="Map::AutozoomJunctionApproachSettings">
+                <autozoom_2D type="DtTemplate::std::map" size="1">
+                    <data>
+                        <key value="Map::CRoadType::RtMajor"/>
+                        <value>
+                            <definition value = "200 ~ 250, 90; 500 ~ 1200, 85; 1500 ~ 1500, 80"/>
+                        </value>
+                    </data>
+                </autozoom_2D>
+                <autozoom_3D type="DtTemplate::std::map" size="4">
+                    <data>
+                        <key value="Map::CRoadType::RtMotorway"/>
+                        <value>
+                            <definition value = "500 ~ 700, 70; 1000 ~ 1000, 55; 1500 ~ 2000, 38"/>
+                        </value>
+                    </data>
+                    <data>
+                        <key value="Map::CRoadType::RtMain"/>
+                        <value>
+                            <definition value = "300 ~ 700, 70; 600 ~ 700, 45; 1300 ~ 1000, 38"/>
+                        </value>
+                    </data>
+                    <data>
+                        <key value="Map::CRoadType::RtSecondary"/>
+                        <value>
+                            <definition value = "100 ~ 600, 60; 200 ~ 600, 50; 300 ~ 700, 45; 500 ~ 800, 40; 1000 ~ 1000, 40; 1500 ~ 1100, 38"/>
+                        </value>
+                    </data>
+                    <data>
+                        <key value="Map::CRoadType::RtMajor"/>
+                        <value>
+                            <definition value = "100 ~ 500, 85; 200 ~ 500, 50; 300 ~ 500, 45; 500 ~ 800, 40; 1000 ~ 1000, 40; 1500 ~ 1100, 38"/>
+                        </value>
+                    </data>
+                </autozoom_3D>
+                <default_road_type value="Map::CRoadType::RtMajor"/>
+                <autozoom_animation>
+                    <start_delta_time value="0"/>
+                    <min_duration value="1000"/>
+                    <max_duration value="1000"/>
+                </autozoom_animation>
+                <translate_animation>
+                    <start_delta_time value="0"/>
+                    <min_duration value="500"/>
+                    <max_duration value="1250"/>
+                </translate_animation>
+                <translate_animation_distance_threshold_m value="100000.0"/>
             </object>
         </settings>
     </map>
