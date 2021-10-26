@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".search.SearchResultFragment">
 
     <FrameLayout
@@ -19,53 +19,51 @@
 
     </FrameLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.appcompat.widget.LinearLayoutCompat
         android:id="@+id/searchResultBottomSheet"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/mapFrameLayout"
-        android:background="@color/colorBlack">
+        android:background="@color/colorBlack"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <TextView
             android:id="@+id/resultTitle"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:layout_margin="20dp"
             android:fontFamily="sans-serif-medium"
             android:textColor="#CDCDCD"
             android:textSize="25sp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            tools:text="Title"/>
+            tools:text="Title" />
 
         <TextView
             android:id="@+id/resultSubtitle"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:layout_margin="20dp"
             android:fontFamily="sans-serif-medium"
             android:textColor="#CDCDCD"
             android:textSize="25sp"
-            app:layout_constraintTop_toBottomOf="@id/resultTitle"
             app:layout_constraintStart_toStartOf="parent"
-            tools:text="Subtitle"/>
+            app:layout_constraintTop_toBottomOf="@id/resultTitle"
+            tools:text="Subtitle" />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabNavigation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="20dp"
-            app:fabSize="normal"
-            app:borderWidth="0dp"
-            android:backgroundTint="#ff5a5d5a"
-            app:maxImageSize="35dp"
-            android:contentDescription="@string/fab_navigation"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:src="@drawable/ic_directions_car_24"
-            tools:src="@drawable/ic_directions_car_24"/>
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabNavigation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:backgroundTint="#ff5a5d5a"
+        android:contentDescription="@string/fab_navigation"
+        android:src="@drawable/ic_directions_car_24"
+        app:borderWidth="0dp"
+        app:fabSize="normal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:maxImageSize="35dp"
+        tools:src="@drawable/ic_directions_car_24" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

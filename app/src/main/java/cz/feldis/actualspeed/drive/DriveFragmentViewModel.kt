@@ -65,13 +65,13 @@ class DriveFragmentViewModel : ViewModel() {
     private val speedLimitTextMutable = MutableLiveData<String>()
     val speedLimitText: LiveData<String> = speedLimitTextMutable
 
-    private val simulateButtonVisibleSignal = SignalingLiveData<Boolean>()
+    private val simulateButtonVisibleSignal = MutableLiveData<Boolean>()
     val simulateButtonVisible: LiveData<Boolean> = simulateButtonVisibleSignal
 
-    private val simulateButtonIconSignal = SignalingLiveData<Int>()
+    private val simulateButtonIconSignal = MutableLiveData<Int>()
     val simulateButtonIcon: LiveData<Int> = simulateButtonIconSignal
 
-    private val stopNavigationButtonVisibleSignal = SignalingLiveData<Boolean>()
+    private val stopNavigationButtonVisibleSignal = MutableLiveData<Boolean>()
     val stopNavigationButtonVisible: LiveData<Boolean> = stopNavigationButtonVisibleSignal
 
     val mapDataModel = DriveMapDataModel()
