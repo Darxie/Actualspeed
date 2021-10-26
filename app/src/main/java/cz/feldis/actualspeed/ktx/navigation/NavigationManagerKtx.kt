@@ -61,4 +61,5 @@ class NavigationManagerKtx :
 
     suspend fun setRouteForNavigation(route: Route) = manager().setRouteForNavigation(route)
     suspend fun getCurrentRoute(): Route? = manager().currentRoute
+    suspend fun stopNavigation() = manager().stopNavigation()
 }

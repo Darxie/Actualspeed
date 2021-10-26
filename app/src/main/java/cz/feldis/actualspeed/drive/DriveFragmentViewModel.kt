@@ -17,8 +17,11 @@ import com.sygic.sdk.position.GeoCoordinates
 import com.sygic.sdk.position.GeoPosition
 import com.sygic.sdk.position.Trajectory
 import com.sygic.sdk.route.PrimaryRouteRequest
+import com.sygic.sdk.route.Route
 import com.sygic.sdk.route.RouteRequest
 import com.sygic.sdk.route.simulator.PositionSimulator
+import com.sygic.sdk.route.simulator.RouteDemonstrateSimulator
+import cz.feldis.actualspeed.R
 import cz.feldis.actualspeed.ktx.navigation.CurrentStreetDetailException
 import cz.feldis.actualspeed.ktx.navigation.NavigationManagerKtx
 import cz.feldis.actualspeed.ktx.position.PositionManagerKtx
@@ -30,13 +33,21 @@ import cz.feldis.actualspeed.utils.SignalingLiveData
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
+private const val TrajectorySearchDistance = 1000 //meters
+
 class DriveFragmentViewModel : ViewModel() {
+
+    private enum class Mode {
+        FreeDrive,
+        Navigation
+    }
 
     private val positionManagerKtx = PositionManagerKtx()
     private val navigationManagerKtx = NavigationManagerKtx()
     private val trajectoryManagerKtx = TrajectoryManagerKtx()
     private val routerKtx = RouterKtx()
     private var currentSpeedLimit = 0f
+    private var simulator: RouteDemonstrateSimulator? = null
     private var simulatorState = PositionSimulator.SimulatorState.Closed
 
     private val currentStreetDetailMutable = MutableLiveData<StreetDetail>()
@@ -57,6 +68,12 @@ class DriveFragmentViewModel : ViewModel() {
     private val simulateButtonVisibleSignal = SignalingLiveData<Boolean>()
     val simulateButtonVisible: LiveData<Boolean> = simulateButtonVisibleSignal
 
+    private val simulateButtonIconSignal = SignalingLiveData<Int>()
+    val simulateButtonIcon: LiveData<Int> = simulateButtonIconSignal
+
+    private val stopNavigationButtonVisibleSignal = SignalingLiveData<Boolean>()
+    val stopNavigationButtonVisible: LiveData<Boolean> = stopNavigationButtonVisibleSignal
+
     val mapDataModel = DriveMapDataModel()
     val cameraDataModel = SimpleCameraDataModel()
 
@@ -64,6 +81,7 @@ class DriveFragmentViewModel : ViewModel() {
         initManagers()
         initMapDataModel()
         resetCamera()
+        setMode(Mode.FreeDrive)
     }
 
     private fun initManagers() {
@@ -87,7 +105,6 @@ class DriveFragmentViewModel : ViewModel() {
     private fun initMapDataModel() {
         viewModelScope.launch {
             with(mapDataModel) {
-                skin = listOf("night")
                 setMapLayerCategoryVisibility(MapView.MapLayerCategory.Sky, false)
                 setMapLayerCategoryVisibility(MapView.MapLayerCategory.Terrain, false)
                 setMapLayerCategoryVisibility(MapView.MapLayerCategory.Areas, false)
@@ -129,38 +146,31 @@ class DriveFragmentViewModel : ViewModel() {
             route?.let {
                 navigationManagerKtx.setRouteForNavigation(it)
                 mapDataModel.setPrimaryRoute(it)
-                mapDataModel.skin = listOf("car", "night")
-                mapDataModel.setMapLayerCategoryVisibility(
-                    MapView.MapLayerCategory.Collections,
-                    false
-                )
-                simulateButtonVisibleSignal.postValue(true)
+                setMode(Mode.Navigation)
             }
         }
+    }
+
+    fun enableDebugLayer(): Boolean {
+        return mapDataModel.setMapLayerCategoryVisibility(
+            MapView.MapLayerCategory.Debug,
+            true
+        ) // toto nefunguje
     }
 
     fun simulate() {
         viewModelScope.launch {
             navigationManagerKtx.getCurrentRoute()?.let {
-                val simulator = RouteSimulatorKtx().provideSimulator(it)
-                simulator.setSpeedMultiplier(2F)
-                simulator.addPositionSimulatorListener(object :
-                    PositionSimulator.PositionSimulatorListener {
-                    override fun onSimulatedStateChanged(state: Int) {
-                        simulatorState = state
-                    }
-
-                    override fun onSimulatedPositionChanged(p0: GeoPosition, p1: Float) {
-                        handlePosition(p0)
-                    }
-                })
-                simulator.start()
+                if (simulatorState != PositionSimulator.SimulatorState.Closed) {
+                    stopSimulation()
+                } else {
+                    startSimulation(it)
+                }
             }
         }
     }
 
     private fun handlePosition(geoPosition: GeoPosition) {
-
         viewModelScope.launch {
             handleTrajectory(trajectoryManagerKtx.createTrajectory())
         }
@@ -193,11 +203,68 @@ class DriveFragmentViewModel : ViewModel() {
     }
 
     private fun handleTrajectory(trajectory: Trajectory?) {
-        for (i in 1..3) {
-            Log.d("TRAJECTORY", "fromStart:" + trajectory?.advance()?.distanceFromStart.toString())
-            Log.d("TRAJECTORY", "angle:" + trajectory?.advance()?.angle.toString())
-            Log.d("TRAJECTORY", "-----------------")
-        }
+        do {
+            trajectory?.advance()?.apply {
+                Log.d("TRAJECTORY", "Point distanceFromStart:$distanceFromStart angle:$angle")
+                if (distanceFromStart > TrajectorySearchDistance) {
+                    return
+                }
+            } ?: return
+        } while (true)
+    }
 
+    private fun setMode(mode: Mode) {
+        viewModelScope.launch {
+            if (mode == Mode.FreeDrive) {
+                stopSimulation()
+                navigationManagerKtx.stopNavigation()
+                mapDataModel.clearPrimaryRoute()
+                mapDataModel.skin = listOf("night")
+                mapDataModel.setMapLayerCategoryVisibility(
+                    MapView.MapLayerCategory.Collections,
+                    true
+                )
+                simulateButtonVisibleSignal.postValue(false)
+                stopNavigationButtonVisibleSignal.postValue(false)
+            } else { // Mode.Navigation
+                mapDataModel.skin = listOf("car", "night")
+                mapDataModel.setMapLayerCategoryVisibility(
+                    MapView.MapLayerCategory.Collections,
+                    false
+                )
+                simulateButtonVisibleSignal.postValue(true)
+                stopNavigationButtonVisibleSignal.postValue(true)
+            }
+        }
+    }
+
+    fun stopNavigation() {
+        setMode(Mode.FreeDrive)
+    }
+
+    private fun stopSimulation() {
+        simulator?.stop()
+        simulatorState = PositionSimulator.SimulatorState.Closed
+        simulateButtonIconSignal.postValue(R.drawable.ic_play_arrow_24)
+    }
+
+    private fun startSimulation(route: Route) {
+        viewModelScope.launch {
+            simulator = RouteSimulatorKtx().provideSimulator(route).apply {
+                setSpeedMultiplier(2F)
+                addPositionSimulatorListener(object :
+                    PositionSimulator.PositionSimulatorListener {
+                    override fun onSimulatedStateChanged(state: Int) {
+                        simulatorState = state
+                    }
+
+                    override fun onSimulatedPositionChanged(position: GeoPosition, p1: Float) {
+                        handlePosition(position)
+                    }
+                })
+                start()
+            }
+            simulateButtonIconSignal.postValue(R.drawable.ic_stop_24)
+        }
     }
 }

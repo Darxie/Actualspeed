@@ -40,6 +40,21 @@
             app:maxImageSize="35dp"
             tools:src="@drawable/ic_play_arrow_24" />
 
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabStopNavigation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:backgroundTint="#ff5a5d5a"
+            android:contentDescription="@string/fab_stop_navigation"
+            android:src="@drawable/ic_cancel_24"
+            app:borderWidth="0dp"
+            app:fabSize="normal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:maxImageSize="35dp"
+            tools:src="@drawable/ic_cancel_24" />
+
         <TextView
             android:id="@+id/street"
             android:layout_width="wrap_content"
