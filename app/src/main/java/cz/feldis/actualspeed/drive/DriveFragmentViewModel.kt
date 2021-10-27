@@ -97,6 +97,9 @@ class DriveFragmentViewModel : ViewModel() {
             launch {
                 navigationManagerKtx.direction().collect { handleDirectionInfo(it) }
             }
+            launch {
+                navigationManagerKtx.routeChanged().collect { handleRouteChanged(it) }
+            }
             positionManagerKtx.startPositionUpdating()
         }
     }
@@ -145,6 +148,14 @@ class DriveFragmentViewModel : ViewModel() {
                     startSimulation(it)
                 }
             }
+        }
+    }
+
+    private fun handleRouteChanged(route: Route?) {
+        viewModelScope.launch {
+            route?.let {
+                mapDataModel.setPrimaryRoute(route)
+            } ?: mapDataModel.clearPrimaryRoute()
         }
     }
 

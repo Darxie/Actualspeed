@@ -43,6 +43,16 @@ class NavigationManagerKtx :
         awaitClose { manager.removeOnDirectionListener(listener) }
     }
 
+    fun routeChanged(): Flow<Route?> = callbackFlow {
+        val manager = manager()
+        val listener = NavigationManager.OnRouteChangedListener { route, _ ->
+            launch { send(route) }
+        }
+
+        manager.addOnRouteChangedListener(listener)
+        awaitClose { manager.removeOnRouteChangedListener(listener) }
+    }
+
     suspend fun currentStreetDetail(): StreetDetail {
         val manager = manager()
         return suspendCancellableCoroutine {
