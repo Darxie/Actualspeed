@@ -15,10 +15,7 @@ import com.sygic.sdk.navigation.routeeventnotifications.DirectionInfo
 import com.sygic.sdk.navigation.routeeventnotifications.SpeedLimitInfo
 import com.sygic.sdk.position.GeoPosition
 import com.sygic.sdk.position.Trajectory
-import com.sygic.sdk.route.PrimaryRouteRequest
 import com.sygic.sdk.route.Route
-import com.sygic.sdk.route.RouteRequest
-import com.sygic.sdk.route.RoutingOptions
 import com.sygic.sdk.route.simulator.PositionSimulator
 import com.sygic.sdk.route.simulator.RouteDemonstrateSimulator
 import cz.feldis.actualspeed.R
@@ -27,8 +24,7 @@ import cz.feldis.actualspeed.ktx.navigation.NavigationManagerKtx
 import cz.feldis.actualspeed.ktx.position.PositionManagerKtx
 import cz.feldis.actualspeed.ktx.position.TrajectoryManagerKtx
 import cz.feldis.actualspeed.ktx.routing.RouteSimulatorKtx
-import cz.feldis.actualspeed.ktx.routing.RouterKtx
-import cz.feldis.actualspeed.utils.RouteComputeListenerWrapper
+import cz.feldis.actualspeed.map.AdvancedMapDataModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -44,7 +40,6 @@ class DriveFragmentViewModel : ViewModel() {
     private val positionManagerKtx = PositionManagerKtx()
     private val navigationManagerKtx = NavigationManagerKtx()
     private val trajectoryManagerKtx = TrajectoryManagerKtx()
-    private val routerKtx = RouterKtx()
     private var currentSpeedLimit = 0f
     private var simulator: RouteDemonstrateSimulator? = null
     private var simulatorState = PositionSimulator.SimulatorState.Closed
@@ -73,14 +68,19 @@ class DriveFragmentViewModel : ViewModel() {
     private val stopNavigationButtonVisibleSignal = MutableLiveData<Boolean>()
     val stopNavigationButtonVisible: LiveData<Boolean> = stopNavigationButtonVisibleSignal
 
-    val mapDataModel = DriveMapDataModel()
+    val mapDataModel = AdvancedMapDataModel()
     val cameraDataModel = SimpleCameraDataModel()
 
     init {
         initManagers()
         initMapDataModel()
         resetCamera()
-        setMode(Mode.FreeDrive)
+        viewModelScope.launch {
+            navigationManagerKtx.getCurrentRoute()?.let {
+                mapDataModel.setPrimaryRoute(it)
+                setMode(Mode.Navigation)
+            } ?: setMode(Mode.FreeDrive)
+        }
     }
 
     private fun initManagers() {
@@ -125,34 +125,6 @@ class DriveFragmentViewModel : ViewModel() {
                 tilt = 90F
                 zoomLevel = 14F
                 position = positionManagerKtx.lastKnownPosition().coordinates
-            }
-        }
-    }
-
-    fun navigateTo(navigateOptions: NavigateOptions) {
-        viewModelScope.launch {
-            val routingOptions = RoutingOptions().apply {
-                isTollRoadAvoided = navigateOptions.avoidTollRoads
-                isUnpavedRoadAvoided = navigateOptions.useUnpavedRoads.not()
-                routingType =
-                    if (navigateOptions.fastestRoute) RoutingOptions.RoutingType.Fastest else RoutingOptions.RoutingType.Shortest
-            }
-            val routeRequest = RouteRequest().apply {
-                setStart(positionManagerKtx.lastKnownPosition().coordinates)
-                setDestination(navigateOptions.destination)
-                this.routingOptions = routingOptions
-            }
-
-            val route = routerKtx.calculateRouteWithAlternatives(
-                PrimaryRouteRequest(
-                    routeRequest,
-                    RouteComputeListenerWrapper()
-                )
-            )
-            route?.let {
-                navigationManagerKtx.setRouteForNavigation(it)
-                mapDataModel.setPrimaryRoute(it)
-                setMode(Mode.Navigation)
             }
         }
     }

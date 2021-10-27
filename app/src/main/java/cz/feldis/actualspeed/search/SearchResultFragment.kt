@@ -12,7 +12,7 @@ import com.sygic.sdk.map.MapView
 import com.sygic.sdk.search.GeocodingResult
 import cz.feldis.actualspeed.R
 import cz.feldis.actualspeed.databinding.FragmentSearchResultBinding
-import cz.feldis.actualspeed.drive.DriveFragment.Companion.ARG_NAVIGATE_OPTIONS
+import kotlinx.android.synthetic.main.fragment_search_result.*
 
 class SearchResultFragment : MapFragment() {
     companion object {
@@ -56,10 +56,7 @@ class SearchResultFragment : MapFragment() {
         }
 
         viewModel.navigateTo.observe(viewLifecycleOwner, {
-            val bundle = Bundle().apply {
-                putParcelable(ARG_NAVIGATE_OPTIONS, it)
-            }
-            findNavController().navigate(R.id.action_searchResultFragment_to_driveFragment, bundle)
+            findNavController().navigate(R.id.action_searchResultFragment_to_driveFragment)
         })
         viewModel.resultTitle.observe(viewLifecycleOwner, { binding.resultTitle.text = it })
         viewModel.resultSubtitle.observe(viewLifecycleOwner, { binding.resultSubtitle.text = it })
@@ -72,8 +69,18 @@ class SearchResultFragment : MapFragment() {
         viewModel.useUnpavedRoads.observe(
             viewLifecycleOwner,
             { binding.useUnpavedRoadsSwitch.isChecked = it })
+        viewModel.calculateButtonVisible.observe(viewLifecycleOwner, {
+            if (it) binding.fabCalculateRoute.show() else binding.fabCalculateRoute.hide()
+        })
+        viewModel.navigateButtonVisible.observe(viewLifecycleOwner, {
+            if (it) binding.fabNavigation.show() else binding.fabNavigation.hide()
+        })
+        viewModel.progressBarVisible.observe(viewLifecycleOwner, {
+            calculateRouteProgress.visibility = if (it) View.VISIBLE else View.GONE
+        })
 
-        binding.fabNavigation.setOnClickListener { viewModel.onNavigateToResultClick() }
+        binding.fabNavigation.setOnClickListener { viewModel.startNavigation() }
+        binding.fabCalculateRoute.setOnClickListener { viewModel.calculateRoute() }
         binding.useFastestRouteSwitch.setOnCheckedChangeListener { _, isChecked ->
             viewModel.setFastestRoute(
                 isChecked

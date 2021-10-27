@@ -1,12 +1,13 @@
-package cz.feldis.actualspeed.drive
+package cz.feldis.actualspeed.map
 
 import com.sygic.sdk.map.`object`.MapRoute
 import com.sygic.sdk.map.data.SimpleMapDataModel
 import com.sygic.sdk.route.Route
 
-class DriveMapDataModel : SimpleMapDataModel() {
+class AdvancedMapDataModel : SimpleMapDataModel() {
 
-    private var primaryRoute: MapRoute? = null
+    var primaryRoute: MapRoute? = null
+    private set
 
     fun setPrimaryRoute(route: Route) {
         clearPrimaryRoute()

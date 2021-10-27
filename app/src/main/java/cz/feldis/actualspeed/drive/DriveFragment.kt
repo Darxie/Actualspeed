@@ -10,27 +10,12 @@ import androidx.navigation.fragment.findNavController
 import com.sygic.sdk.map.Camera
 import com.sygic.sdk.map.MapFragment
 import com.sygic.sdk.map.MapView
-import com.sygic.sdk.position.GeoCoordinates
 import cz.feldis.actualspeed.R
 import cz.feldis.actualspeed.databinding.FragmentDriveBinding
 
 class DriveFragment : MapFragment() {
-    companion object {
-        const val ARG_NAVIGATE_OPTIONS = "arg_navigate_options"
-    }
-
     private lateinit var binding: FragmentDriveBinding
     private val viewModel: DriveFragmentViewModel by viewModels()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            val navigateOptions: NavigateOptions? = it.getParcelable(ARG_NAVIGATE_OPTIONS)
-            navigateOptions?.let {
-                viewModel.navigateTo(navigateOptions)
-            }
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

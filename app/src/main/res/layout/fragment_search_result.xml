@@ -135,6 +135,31 @@
             android:layout_margin="20dp"
             android:backgroundTint="#ff5a5d5a"
             android:contentDescription="@string/fab_navigation"
+            android:src="@drawable/ic_navigation_24"
+            app:borderWidth="0dp"
+            app:fabSize="normal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:maxImageSize="35dp"
+            tools:src="@drawable/ic_navigation_24" />
+
+        <ProgressBar
+            android:id="@+id/calculateRouteProgress"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_margin="20dp"
+            android:indeterminate="true"
+            android:indeterminateTint="#ff5a5d5a"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabCalculateRoute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:backgroundTint="#ff5a5d5a"
+            android:contentDescription="@string/fab_calculate_route"
             android:src="@drawable/ic_directions_car_24"
             app:borderWidth="0dp"
             app:fabSize="normal"

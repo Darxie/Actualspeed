@@ -5,18 +5,30 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sygic.sdk.map.Camera
+import com.sygic.sdk.map.MapRectangle
 import com.sygic.sdk.map.MapView
 import com.sygic.sdk.map.`object`.MapMarker
 import com.sygic.sdk.map.data.SimpleCameraDataModel
-import com.sygic.sdk.map.data.SimpleMapDataModel
+import com.sygic.sdk.route.PrimaryRouteRequest
+import com.sygic.sdk.route.RouteRequest
+import com.sygic.sdk.route.RoutingOptions
 import com.sygic.sdk.search.GeocodingResult
-import cz.feldis.actualspeed.drive.NavigateOptions
+import cz.feldis.actualspeed.map.AdvancedMapDataModel
+import cz.feldis.actualspeed.ktx.navigation.NavigationManagerKtx
+import cz.feldis.actualspeed.ktx.position.PositionManagerKtx
+import cz.feldis.actualspeed.ktx.routing.RouterKtx
+import cz.feldis.actualspeed.utils.RouteComputeListenerWrapper
 import cz.feldis.actualspeed.utils.SignalingLiveData
 import kotlinx.coroutines.launch
 
+private const val RouteMargin = 0.2F
+
 class SearchResultFragmentViewModel : ViewModel() {
+    private val positionManagerKtx = PositionManagerKtx()
+    private val navigationManagerKtx = NavigationManagerKtx()
+
     private lateinit var geocodingResult: GeocodingResult
-    val mapDataModel = SimpleMapDataModel()
+    val mapDataModel = AdvancedMapDataModel()
     val cameraDataModel = SimpleCameraDataModel()
 
     private val resultTitleSignal = SignalingLiveData<String>()
@@ -25,8 +37,8 @@ class SearchResultFragmentViewModel : ViewModel() {
     private val resultSubtitleSignal = SignalingLiveData<String>()
     val resultSubtitle: LiveData<String> = resultSubtitleSignal
 
-    private val navigateToSignal = SignalingLiveData<NavigateOptions>()
-    val navigateTo: LiveData<NavigateOptions> = navigateToSignal
+    private val navigateToSignal = SignalingLiveData<Void>()
+    val navigateTo: LiveData<Void> = navigateToSignal
 
     private val fastestRouteSignal = MutableLiveData<Boolean>()
     val fastestRoute: LiveData<Boolean> = fastestRouteSignal
@@ -37,10 +49,22 @@ class SearchResultFragmentViewModel : ViewModel() {
     private val useUnpavedRoadsSignal = MutableLiveData<Boolean>()
     val useUnpavedRoads: LiveData<Boolean> = useUnpavedRoadsSignal
 
+    private val calculateButtonVisibleSignal = MutableLiveData<Boolean>()
+    val calculateButtonVisible: LiveData<Boolean> = calculateButtonVisibleSignal
+
+    private val navigateButtonVisibleSignal = MutableLiveData<Boolean>()
+    val navigateButtonVisible: LiveData<Boolean> = navigateButtonVisibleSignal
+
+    private val progressBarVisibleSignal = MutableLiveData<Boolean>()
+    val progressBarVisible: LiveData<Boolean> = progressBarVisibleSignal
+
     init {
         initMapDataModel()
         resetCamera()
         initRoutingOptions()
+        calculateButtonVisibleSignal.postValue(false)
+        navigateButtonVisibleSignal.postValue(false)
+        progressBarVisibleSignal.postValue(false)
     }
 
     private fun initRoutingOptions() {
@@ -62,6 +86,10 @@ class SearchResultFragmentViewModel : ViewModel() {
     }
 
     fun showResult(geocodingResult: GeocodingResult) {
+        calculateButtonVisibleSignal.postValue(true)
+        navigateButtonVisibleSignal.postValue(false)
+        progressBarVisibleSignal.postValue(false)
+
         this.geocodingResult = geocodingResult
         viewModelScope.launch {
             with(geocodingResult) {
@@ -100,14 +128,44 @@ class SearchResultFragmentViewModel : ViewModel() {
         }
     }
 
-    fun onNavigateToResultClick() {
-        navigateToSignal.postValue(
-            NavigateOptions(
-                geocodingResult.location,
-                fastestRouteSignal.value ?: true,
-                avoidTollRoadsSignal.value ?: true,
-                useUnpavedRoadsSignal.value ?: true
+    fun calculateRoute() {
+        viewModelScope.launch {
+            calculateButtonVisibleSignal.postValue(false)
+            progressBarVisibleSignal.postValue(true)
+            val routingOptions = RoutingOptions().apply {
+                isTollRoadAvoided = avoidTollRoadsSignal.value ?: false
+                isUnpavedRoadAvoided = useUnpavedRoadsSignal.value ?: false
+                routingType =
+                    if (fastestRouteSignal.value != false) RoutingOptions.RoutingType.Fastest else RoutingOptions.RoutingType.Shortest
+            }
+            val routeRequest = RouteRequest().apply {
+                setStart(positionManagerKtx.lastKnownPosition().coordinates)
+                setDestination(geocodingResult.location)
+                this.routingOptions = routingOptions
+            }
+
+            val route = RouterKtx().calculateRouteWithAlternatives(
+                PrimaryRouteRequest(
+                    routeRequest,
+                    RouteComputeListenerWrapper()
+                )
             )
-        )
+            progressBarVisibleSignal.postValue(false)
+            navigateButtonVisibleSignal.postValue(true)
+            route?.let {
+                mapDataModel.setPrimaryRoute(it)
+                cameraDataModel.mapRectangle = MapRectangle(it.boundingBox, RouteMargin, RouteMargin, RouteMargin, RouteMargin)
+            }
+        }
+    }
+
+    fun startNavigation() {
+        viewModelScope.launch {
+            mapDataModel.primaryRoute?.data?.route?.let {
+                navigationManagerKtx.setRouteForNavigation(it)
+            }
+
+            navigateToSignal.postValue(null)
+        }
     }
 }
