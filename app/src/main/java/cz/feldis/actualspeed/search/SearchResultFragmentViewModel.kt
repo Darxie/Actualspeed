@@ -69,7 +69,7 @@ class SearchResultFragmentViewModel : ViewModel() {
 
     private fun initRoutingOptions() {
         fastestRouteSignal.postValue(true)
-        avoidTollRoadsSignal.postValue(false)
+        avoidTollRoadsSignal.postValue(true)
         useUnpavedRoadsSignal.postValue(false)
     }
 

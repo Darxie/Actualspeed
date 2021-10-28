@@ -43,13 +43,13 @@
             <object name="autozoom" type="Map::AutozoomJunctionApproachSettings">
                 <autozoom_2D type="DtTemplate::std::map" size="1">
                     <data>
-                        <key value="Map::CRoadType::RtMajor"/>
+                        <key value="Map::CRoadType::RtSecondary"/>
                         <value>
-                            <definition value = "200 ~ 250, 90; 500 ~ 1200, 85; 1500 ~ 1500, 80"/>
+                            <definition value = "200 ~ 700, 120"/>
                         </value>
                     </data>
                 </autozoom_2D>
-                <autozoom_3D type="DtTemplate::std::map" size="4">
+                <autozoom_3D type="DtTemplate::std::map" size="2">
                     <data>
                         <key value="Map::CRoadType::RtMotorway"/>
                         <value>
@@ -57,21 +57,9 @@
                         </value>
                     </data>
                     <data>
-                        <key value="Map::CRoadType::RtMain"/>
-                        <value>
-                            <definition value = "300 ~ 700, 70; 600 ~ 700, 45; 1300 ~ 1000, 38"/>
-                        </value>
-                    </data>
-                    <data>
-                        <key value="Map::CRoadType::RtSecondary"/>
-                        <value>
-                            <definition value = "100 ~ 600, 60; 200 ~ 600, 50; 300 ~ 700, 45; 500 ~ 800, 40; 1000 ~ 1000, 40; 1500 ~ 1100, 38"/>
-                        </value>
-                    </data>
-                    <data>
                         <key value="Map::CRoadType::RtMajor"/>
                         <value>
-                            <definition value = "100 ~ 500, 85; 200 ~ 500, 50; 300 ~ 500, 45; 500 ~ 800, 40; 1000 ~ 1000, 40; 1500 ~ 1100, 38"/>
+                            <definition value = "100 ~ 600, 79; 200 ~ 700, 50; 300 ~ 600, 45; 500 ~ 800, 40; 1000 ~ 1000, 40; 1500 ~ 1100, 38"/>
                         </value>
                     </data>
                 </autozoom_3D>
