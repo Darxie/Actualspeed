@@ -1,7 +1,6 @@
 package cz.feldis.actualspeed.drive
 
 import android.graphics.Color
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,7 +13,6 @@ import com.sygic.sdk.navigation.StreetInfo
 import com.sygic.sdk.navigation.routeeventnotifications.DirectionInfo
 import com.sygic.sdk.navigation.routeeventnotifications.SpeedLimitInfo
 import com.sygic.sdk.position.GeoPosition
-import com.sygic.sdk.position.Trajectory
 import com.sygic.sdk.route.Route
 import com.sygic.sdk.route.simulator.PositionSimulator
 import com.sygic.sdk.route.simulator.RouteDemonstrateSimulator
@@ -23,12 +21,11 @@ import cz.feldis.actualspeed.ktx.navigation.CurrentStreetDetailException
 import cz.feldis.actualspeed.ktx.navigation.NavigationManagerKtx
 import cz.feldis.actualspeed.ktx.position.PositionManagerKtx
 import cz.feldis.actualspeed.ktx.position.TrajectoryManagerKtx
+import cz.feldis.actualspeed.ktx.position.TrajectoryResult
 import cz.feldis.actualspeed.ktx.routing.RouteSimulatorKtx
 import cz.feldis.actualspeed.map.AdvancedMapDataModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-
-private const val TrajectorySearchDistance = 1000 //meters
 
 class DriveFragmentViewModel : ViewModel() {
 
@@ -81,6 +78,12 @@ class DriveFragmentViewModel : ViewModel() {
                 setMode(Mode.Navigation)
             } ?: setMode(Mode.FreeDrive)
         }
+    }
+
+    override fun onCleared() {
+        mapDataModel.clearPrimaryRoute()
+        mapDataModel.clearTrajectory()
+        super.onCleared()
     }
 
     private fun initManagers() {
@@ -191,15 +194,18 @@ class DriveFragmentViewModel : ViewModel() {
         //ToDO
     }
 
-    private fun handleTrajectory(trajectory: Trajectory?) {
-        do {
-            trajectory?.advance()?.apply {
-                if (distanceFromStart > TrajectorySearchDistance) {
-                    return
+    private fun handleTrajectory(trajectoryResult: TrajectoryResult) {
+        viewModelScope.launch {
+            with(trajectoryResult) {
+                when (this) {
+                    is TrajectoryResult.Success -> {
+                        mapDataModel.setTrajectory(trajectory)
+                        trajectoryManagerKtx.destroyTrajectory(trajectory)
+                    }
+                    is TrajectoryResult.Error -> mapDataModel.clearTrajectory()
                 }
-                Log.d("TRAJECTORY", "Point distanceFromStart:$distanceFromStart angle:$angle")
-            } ?: return
-        } while (true)
+            }
+        }
     }
 
     private fun setMode(mode: Mode) {

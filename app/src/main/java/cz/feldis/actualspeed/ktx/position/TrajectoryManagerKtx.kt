@@ -6,24 +6,27 @@ import com.sygic.sdk.position.TrajectoryManagerProvider
 import com.sygic.sdk.position.listeners.OnTrajectoryCreated
 import cz.feldis.actualspeed.ktx.SdkManagerKtx
 import kotlinx.coroutines.suspendCancellableCoroutine
-import java.lang.Exception
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 data class CreateTrajectoryException(val errorCode: Trajectory.ResultCode) : Exception("CreateTrajectory failed with Trajectory.ResultCode: $errorCode")
 
+sealed class TrajectoryResult {
+    data class Success(val trajectory: Trajectory) : TrajectoryResult()
+    data class Error(val error: CreateTrajectoryException) : TrajectoryResult()
+}
+
 class TrajectoryManagerKtx : SdkManagerKtx<TrajectoryManager>(TrajectoryManagerProvider::getInstance) {
 
-    suspend fun createTrajectory(): Trajectory {
+    suspend fun createTrajectory(): TrajectoryResult {
         val trajectoryManager = manager()
         return suspendCancellableCoroutine {
             trajectoryManager.createTrajectory(object : OnTrajectoryCreated {
                 override fun onSuccess(trajectory: Trajectory) {
-                    it.resume(trajectory)
+                    it.resume(TrajectoryResult.Success(trajectory))
                 }
 
                 override fun onError(errorCode: Trajectory.ResultCode) {
-                    it.resumeWithException(CreateTrajectoryException(errorCode))
+                    it.resume(TrajectoryResult.Error(CreateTrajectoryException(errorCode)))
                 }
             })
         }
