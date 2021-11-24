@@ -1,2 +1,11 @@
+apply from: 'buildSdk.gradle'
+
 include ':app'
 rootProject.name = "Rallye Instruction Provider"
+
+if (gradle.wantsToBuildSdkFromSource()) {
+    include ':sdk'
+    project(':sdk').projectDir = gradle.getSdkDir()
+    include ':annotation-processor'
+    project(':annotation-processor').projectDir = new File(gradle.getSdkDir(), '../annotation-processor')
+}
