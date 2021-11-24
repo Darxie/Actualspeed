@@ -4,12 +4,8 @@ import com.sygic.sdk.map.`object`.MapMarker
 import com.sygic.sdk.map.`object`.MapRoute
 import com.sygic.sdk.map.data.SimpleMapDataModel
 import com.sygic.sdk.position.GeoCoordinates
-import com.sygic.sdk.position.Trajectory
-import com.sygic.sdk.position.data.TrajectoryPoint
 import com.sygic.sdk.route.Route
 import cz.feldis.actualspeed.R
-
-private const val MaxTrajectoryPoints = 20
 
 class AdvancedMapDataModel : SimpleMapDataModel() {
 
@@ -32,31 +28,23 @@ class AdvancedMapDataModel : SimpleMapDataModel() {
         }
     }
 
-    fun setTrajectory(trajectory: Trajectory) {
+    fun setTrajectory(points: List<GeoCoordinates>) {
         val newTrajectory = mutableMapOf<GeoCoordinates, MapMarker>()
-        var point: TrajectoryPoint?
-        do {
-            point = trajectory.advance()
+        points.forEach { position ->
 
-            point?.apply {
-                if (trajectoryPoints.containsKey(position)) {
-                    // marker na tejto polohe uz je, len ho prehodim do noveho zoznamu
-                    newTrajectory[position] = requireNotNull(trajectoryPoints[position])
-                    trajectoryPoints.remove(position)
-                } else {
-                    // marker je novy
-                    val marker = MapMarker.at(position)
-                        .withIcon(R.drawable.circle)
-                        .build()
-                    newTrajectory[position] = marker
-                    addMapObject(marker)
-                }
+            if (trajectoryPoints.containsKey(position)) {
+                // marker na tejto polohe uz je, len ho prehodim do noveho zoznamu
+                newTrajectory[position] = requireNotNull(trajectoryPoints[position])
+                trajectoryPoints.remove(position)
+            } else {
+                // marker je novy
+                val marker = MapMarker.at(position)
+                    .withIcon(R.drawable.circle)
+                    .build()
+                newTrajectory[position] = marker
+                addMapObject(marker)
             }
-
-            if (newTrajectory.size >= MaxTrajectoryPoints) {
-                break
-            }
-        } while(point != null)
+        }
 
         // odstranit markery, ktory boli v starej a uz nie su v novej trajektorii
         trajectoryPoints.forEach { removeMapObject(it.value) }

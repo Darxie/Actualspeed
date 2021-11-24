@@ -10,6 +10,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import cz.feldis.actualspeed.R
 import cz.feldis.actualspeed.databinding.FragmentSearchBinding
+import cz.feldis.actualspeed.utils.focusAndShowKeyboard
 import cz.feldis.actualspeed.utils.hideKb
 
 class SearchFragment : Fragment() {
@@ -33,6 +34,7 @@ class SearchFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.searchInput.addTextChangedListener(viewModel)
+        binding.searchInput.focusAndShowKeyboard()
 
         viewModel.searchResults.observe(viewLifecycleOwner, {
             (binding.searchResults.adapter as SearchRecyclerViewAdapter).setData(it)

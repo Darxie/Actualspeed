@@ -2,6 +2,7 @@ package cz.feldis.actualspeed.ktx.navigation
 
 import com.sygic.sdk.navigation.*
 import com.sygic.sdk.navigation.routeeventnotifications.DirectionInfo
+import com.sygic.sdk.navigation.routeeventnotifications.SharpCurveInfo
 import com.sygic.sdk.navigation.routeeventnotifications.SpeedLimitInfo
 import com.sygic.sdk.route.Route
 import cz.feldis.actualspeed.ktx.SdkManagerKtx
@@ -41,6 +42,14 @@ class NavigationManagerKtx :
 
         manager.addOnDirectionListener(listener)
         awaitClose { manager.removeOnDirectionListener(listener) }
+    }
+
+    fun curves(): Flow<SharpCurveInfo> = callbackFlow {
+        val manager = manager()
+        val listener = NavigationManager.OnSharpCurveListener { launch { send(it) } }
+
+        manager.addOnSharpCurveListener(listener)
+        awaitClose { manager.removeOnSharpCurveListener(listener) }
     }
 
     fun routeChanged(): Flow<Route?> = callbackFlow {

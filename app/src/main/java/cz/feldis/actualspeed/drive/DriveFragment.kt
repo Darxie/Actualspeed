@@ -63,10 +63,16 @@ class DriveFragment : MapFragment() {
             binding.speedInfoLayout.speedLimit.text = it
         })
         viewModel.currentStreetInfo.observe(viewLifecycleOwner, {
-            binding.street.text = getString(R.string.current_street, it.street, it.city)
+            binding.street.text = getString(R.string.current_street, it.street)
         })
-        viewModel.currentStreetDetail.observe(viewLifecycleOwner, {
-            binding.junction.text = getString(R.string.next_junction, it.distanceToNextJunction)
+        viewModel.nextCurveDistance.observe(viewLifecycleOwner, {
+            binding.nextCurveDistance.text = it
+        })
+        viewModel.nextCurveText.observe(viewLifecycleOwner, {
+            binding.nextCurveText.text = getString(it)
+        })
+        viewModel.nextCurveImage.observe(viewLifecycleOwner, {
+            binding.nextCurveImage.setImageResource(it)
         })
     }
 }

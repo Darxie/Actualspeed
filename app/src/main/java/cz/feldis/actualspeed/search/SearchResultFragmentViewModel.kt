@@ -37,8 +37,8 @@ class SearchResultFragmentViewModel : ViewModel() {
     private val resultSubtitleSignal = SignalingLiveData<String>()
     val resultSubtitle: LiveData<String> = resultSubtitleSignal
 
-    private val navigateToSignal = SignalingLiveData<Void>()
-    val navigateTo: LiveData<Void> = navigateToSignal
+    private val navigateToSignal = SignalingLiveData<Unit>()
+    val navigateTo: LiveData<Unit> = navigateToSignal
 
     private val fastestRouteSignal = MutableLiveData<Boolean>()
     val fastestRoute: LiveData<Boolean> = fastestRouteSignal
@@ -159,13 +159,18 @@ class SearchResultFragmentViewModel : ViewModel() {
         }
     }
 
+    override fun onCleared() {
+        super.onCleared()
+        mapDataModel.clearPrimaryRoute()
+    }
+
     fun startNavigation() {
         viewModelScope.launch {
             mapDataModel.primaryRoute?.data?.route?.let {
                 navigationManagerKtx.setRouteForNavigation(it)
             }
 
-            navigateToSignal.postValue(null)
+            navigateToSignal.postValue(Unit)
         }
     }
 }

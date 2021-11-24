@@ -1,6 +1,7 @@
 package cz.feldis.actualspeed.drive
 
 import android.graphics.Color
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,22 +9,20 @@ import androidx.lifecycle.viewModelScope
 import com.sygic.sdk.map.Camera
 import com.sygic.sdk.map.MapView
 import com.sygic.sdk.map.data.SimpleCameraDataModel
-import com.sygic.sdk.navigation.StreetDetail
 import com.sygic.sdk.navigation.StreetInfo
-import com.sygic.sdk.navigation.routeeventnotifications.DirectionInfo
+import com.sygic.sdk.navigation.routeeventnotifications.SharpCurveInfo
 import com.sygic.sdk.navigation.routeeventnotifications.SpeedLimitInfo
 import com.sygic.sdk.position.GeoPosition
 import com.sygic.sdk.route.Route
 import com.sygic.sdk.route.simulator.PositionSimulator
 import com.sygic.sdk.route.simulator.RouteDemonstrateSimulator
 import cz.feldis.actualspeed.R
-import cz.feldis.actualspeed.ktx.navigation.CurrentStreetDetailException
+import cz.feldis.actualspeed.curves.Curve
 import cz.feldis.actualspeed.ktx.navigation.NavigationManagerKtx
 import cz.feldis.actualspeed.ktx.position.PositionManagerKtx
-import cz.feldis.actualspeed.ktx.position.TrajectoryManagerKtx
-import cz.feldis.actualspeed.ktx.position.TrajectoryResult
 import cz.feldis.actualspeed.ktx.routing.RouteSimulatorKtx
 import cz.feldis.actualspeed.map.AdvancedMapDataModel
+import cz.feldis.actualspeed.utils.Units
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -34,15 +33,24 @@ class DriveFragmentViewModel : ViewModel() {
         Navigation
     }
 
+    val mapDataModel = AdvancedMapDataModel()
+    val cameraDataModel = SimpleCameraDataModel()
+
     private val positionManagerKtx = PositionManagerKtx()
     private val navigationManagerKtx = NavigationManagerKtx()
-    private val trajectoryManagerKtx = TrajectoryManagerKtx()
+
     private var currentSpeedLimit = 0f
     private var simulator: RouteDemonstrateSimulator? = null
     private var simulatorState = PositionSimulator.SimulatorState.Closed
 
-    private val currentStreetDetailMutable = MutableLiveData<StreetDetail>()
-    val currentStreetDetail: LiveData<StreetDetail> = currentStreetDetailMutable
+    private val nextCurveDistanceMutable = MutableLiveData<String>()
+    val nextCurveDistance: LiveData<String> = nextCurveDistanceMutable
+
+    private val nextCurveTextMutable = MutableLiveData<Int>()
+    val nextCurveText: LiveData<Int> = nextCurveTextMutable
+
+    private val nextCurveImageMutable = MutableLiveData<Int>()
+    val nextCurveImage: LiveData<Int> = nextCurveImageMutable
 
     private val currentStreetInfoMutable = MutableLiveData<StreetInfo>()
     val currentStreetInfo: LiveData<StreetInfo> = currentStreetInfoMutable
@@ -65,16 +73,12 @@ class DriveFragmentViewModel : ViewModel() {
     private val stopNavigationButtonVisibleSignal = MutableLiveData<Boolean>()
     val stopNavigationButtonVisible: LiveData<Boolean> = stopNavigationButtonVisibleSignal
 
-    val mapDataModel = AdvancedMapDataModel()
-    val cameraDataModel = SimpleCameraDataModel()
-
     init {
         initManagers()
         initMapDataModel()
         resetCamera()
         viewModelScope.launch {
             navigationManagerKtx.getCurrentRoute()?.let {
-                mapDataModel.setPrimaryRoute(it)
                 setMode(Mode.Navigation)
             } ?: setMode(Mode.FreeDrive)
         }
@@ -98,10 +102,9 @@ class DriveFragmentViewModel : ViewModel() {
                 navigationManagerKtx.street().collect { handleStreetInfo(it) }
             }
             launch {
-                navigationManagerKtx.direction().collect { handleDirectionInfo(it) }
-            }
-            launch {
-                navigationManagerKtx.routeChanged().collect { handleRouteChanged(it) }
+                navigationManagerKtx.curves().collect {
+                    handleCurve(it)
+                }
             }
             positionManagerKtx.startPositionUpdating()
         }
@@ -119,6 +122,7 @@ class DriveFragmentViewModel : ViewModel() {
                 setMapLayerCategoryVisibility(MapView.MapLayerCategory.LabelCityCenters, false)
                 setMapLayerCategoryVisibility(MapView.MapLayerCategory.LabelAddressPoints, false)
                 setMapLayerCategoryVisibility(MapView.MapLayerCategory.SmartLabels, false)
+                setMapLayerCategoryVisibility(MapView.MapLayerCategory.RouteJunctions, false)
             }
         }
     }
@@ -154,19 +158,7 @@ class DriveFragmentViewModel : ViewModel() {
         }
     }
 
-    private fun handleRouteChanged(route: Route?) {
-        viewModelScope.launch {
-            route?.let {
-                mapDataModel.setPrimaryRoute(route)
-            } ?: mapDataModel.clearPrimaryRoute()
-        }
-    }
-
     private fun handlePosition(geoPosition: GeoPosition) {
-        viewModelScope.launch {
-            handleTrajectory(trajectoryManagerKtx.createTrajectory())
-        }
-
         currentSpeedTextMutable.postValue(geoPosition.speed.toInt().toString())
         if (geoPosition.speed > currentSpeedLimit + 5f) {
             currentSpeedColorMutable.postValue(Color.RED)
@@ -180,32 +172,16 @@ class DriveFragmentViewModel : ViewModel() {
         speedLimitTextMutable.postValue(currentSpeedLimit.toInt().toString())
     }
 
-    private suspend fun handleStreetInfo(streetInfo: StreetInfo) {
+    private fun handleStreetInfo(streetInfo: StreetInfo) {
         currentStreetInfoMutable.postValue(streetInfo)
-        try {
-            val streetDetail = navigationManagerKtx.currentStreetDetail()
-            currentStreetDetailMutable.postValue(streetDetail)
-        } catch (exception: CurrentStreetDetailException) {
-            println(exception.message)
-        }
     }
 
-    private fun handleDirectionInfo(directionInfo: DirectionInfo) {
-        //ToDO
-    }
-
-    private fun handleTrajectory(trajectoryResult: TrajectoryResult) {
-        viewModelScope.launch {
-            with(trajectoryResult) {
-                when (this) {
-                    is TrajectoryResult.Success -> {
-                        mapDataModel.setTrajectory(trajectory)
-                        trajectoryManagerKtx.destroyTrajectory(trajectory)
-                    }
-                    is TrajectoryResult.Error -> mapDataModel.clearTrajectory()
-                }
-            }
-        }
+    private fun handleCurve(sharpCurveInfo: SharpCurveInfo) {
+        Log.e("XXX", "SharpCurve angle: ${sharpCurveInfo.angle} direction: ${sharpCurveInfo.direction}")
+        val curve = Curve.fromSharpCurveInfo(sharpCurveInfo)
+        nextCurveTextMutable.postValue(curve.description())
+        nextCurveImageMutable.postValue(curve.icon())
+        nextCurveDistanceMutable.postValue(Units.formatMeters(curve.distance))
     }
 
     private fun setMode(mode: Mode) {

@@ -1,11 +1,12 @@
 <resources>
     <string name="app_name">Rallye Instruction Provider</string>
     <string name="street_will_be_shown_here">Street will be shown here</string>
-    <string name="junction_will_be_shown_here">Junction will be shown here</string>
+    <string name="next_turn">100m</string>
+    <string name="jump_maybe">Jump maybe</string>
     <string name="speedlimit_image">SpeedLimit image</string>
     <string name="text">text</string>
 
-    <string name="current_street">%s \n %s</string>
+    <string name="current_street">%s</string>
     <string name="next_junction">Next junction in %dm</string>
     <string name="fab_search">FAB Search</string>
     <string name="fab_simulation">FAB Simulation</string>
@@ -17,4 +18,18 @@
     <string name="use_unpaved_roads">Use unpaved roads</string>
     <string name="use_fastest_route">Use fastest rotue</string>
     <string name="avoid_tollroads">Avoid tollroads</string>
+
+    <!-- arrows -->
+    <string name="arrow_left_20">rovno</string>
+    <string name="arrow_left_40">jemne vlavo</string>
+    <string name="arrow_left_60">mierne vlavo</string>
+    <string name="arrow_left_90">vlavo</string>
+    <string name="arrow_left_120">ostro vlavo</string>
+    <string name="arrow_left_180">celom vzad vlavo</string>
+    <string name="arrow_right_20">rovno</string>
+    <string name="arrow_right_40">jemne vpravo</string>
+    <string name="arrow_right_60">mierne vpravo</string>
+    <string name="arrow_right_90">vpravo</string>
+    <string name="arrow_right_120">ostro vpravo</string>
+    <string name="arrow_right_180">celom vzad vpravo</string>
 </resources>
