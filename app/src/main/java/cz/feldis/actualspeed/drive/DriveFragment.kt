@@ -6,16 +6,20 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.sygic.sdk.map.Camera
 import com.sygic.sdk.map.MapFragment
 import com.sygic.sdk.map.MapView
 import cz.feldis.actualspeed.R
 import cz.feldis.actualspeed.databinding.FragmentDriveBinding
+import cz.feldis.actualspeed.ktx.audio.AudioManagerKtx
+import kotlinx.coroutines.launch
 
 class DriveFragment : MapFragment() {
     private lateinit var binding: FragmentDriveBinding
     private val viewModel: DriveFragmentViewModel by viewModels()
+    private val audioManagerKtx = AudioManagerKtx()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -69,7 +73,12 @@ class DriveFragment : MapFragment() {
             binding.nextCurveDistance.text = it
         })
         viewModel.nextCurveText.observe(viewLifecycleOwner, {
-            binding.nextCurveText.text = getString(it)
+            getString(it).apply {
+                binding.nextCurveText.text = this
+                lifecycleScope.launch {
+                    audioManagerKtx.playTTS(this@apply)
+                }
+            }
         })
         viewModel.nextCurveImage.observe(viewLifecycleOwner, {
             binding.nextCurveImage.setImageResource(it)

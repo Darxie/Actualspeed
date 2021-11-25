@@ -6,25 +6,35 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sygic.sdk.audio.AudioManager
 import com.sygic.sdk.map.Camera
 import com.sygic.sdk.map.MapView
 import com.sygic.sdk.map.data.SimpleCameraDataModel
 import com.sygic.sdk.navigation.StreetInfo
 import com.sygic.sdk.navigation.routeeventnotifications.SharpCurveInfo
 import com.sygic.sdk.navigation.routeeventnotifications.SpeedLimitInfo
+import com.sygic.sdk.position.GeoCoordinates
 import com.sygic.sdk.position.GeoPosition
+import com.sygic.sdk.route.PrimaryRouteRequest
 import com.sygic.sdk.route.Route
+import com.sygic.sdk.route.RouteRequest
+import com.sygic.sdk.route.RoutingOptions
 import com.sygic.sdk.route.simulator.PositionSimulator
 import com.sygic.sdk.route.simulator.RouteDemonstrateSimulator
 import cz.feldis.actualspeed.R
 import cz.feldis.actualspeed.curves.Curve
+import cz.feldis.actualspeed.ktx.audio.AudioManagerKtx
 import cz.feldis.actualspeed.ktx.navigation.NavigationManagerKtx
 import cz.feldis.actualspeed.ktx.position.PositionManagerKtx
 import cz.feldis.actualspeed.ktx.routing.RouteSimulatorKtx
+import cz.feldis.actualspeed.ktx.routing.RouterKtx
 import cz.feldis.actualspeed.map.AdvancedMapDataModel
+import cz.feldis.actualspeed.utils.RouteComputeListenerWrapper
 import cz.feldis.actualspeed.utils.Units
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+
+const val BabaDemo = true
 
 class DriveFragmentViewModel : ViewModel() {
 
@@ -78,9 +88,34 @@ class DriveFragmentViewModel : ViewModel() {
         initMapDataModel()
         resetCamera()
         viewModelScope.launch {
-            navigationManagerKtx.getCurrentRoute()?.let {
-                setMode(Mode.Navigation)
-            } ?: setMode(Mode.FreeDrive)
+            if (BabaDemo) {
+                babaRoute()
+            }
+            else {
+                navigationManagerKtx.getCurrentRoute()?.let {
+                    setMode(Mode.Navigation)
+                } ?: setMode(Mode.FreeDrive)
+            }
+        }
+    }
+
+    private suspend fun babaRoute() {
+        setMode(Mode.Navigation)
+
+        val routeRequest = RouteRequest().apply {
+            setStart(GeoCoordinates(48.342614017202735, 17.221804079842677))
+            setDestination(GeoCoordinates(48.362013613994165, 17.171891625370957))
+        }
+
+        val route = RouterKtx().calculateRouteWithAlternatives(
+            PrimaryRouteRequest(
+                routeRequest,
+                RouteComputeListenerWrapper()
+            )
+        )
+        route?.let{
+            navigationManagerKtx.setRouteForNavigation(it)
+            startSimulation(it)
         }
     }
 
@@ -203,8 +238,8 @@ class DriveFragmentViewModel : ViewModel() {
                     MapView.MapLayerCategory.Collections,
                     false
                 )
-                simulateButtonVisibleSignal.postValue(true)
-                stopNavigationButtonVisibleSignal.postValue(true)
+                simulateButtonVisibleSignal.postValue(BabaDemo.not())
+                stopNavigationButtonVisibleSignal.postValue(BabaDemo.not())
             }
         }
     }
@@ -227,6 +262,9 @@ class DriveFragmentViewModel : ViewModel() {
                     PositionSimulator.PositionSimulatorListener {
                     override fun onSimulatedStateChanged(state: Int) {
                         simulatorState = state
+                        if (simulatorState == PositionSimulator.SimulatorState.End) {
+                            simulator?.start()
+                        }
                     }
 
                     override fun onSimulatedPositionChanged(position: GeoPosition, p1: Float) {
