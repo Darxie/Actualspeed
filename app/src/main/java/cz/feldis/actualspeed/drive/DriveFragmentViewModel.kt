@@ -34,7 +34,7 @@ import cz.feldis.actualspeed.utils.Units
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-const val BabaDemo = true
+const val BabaDemo = false
 
 class DriveFragmentViewModel : ViewModel() {
 
@@ -137,6 +137,9 @@ class DriveFragmentViewModel : ViewModel() {
                 navigationManagerKtx.street().collect { handleStreetInfo(it) }
             }
             launch {
+                navigationManagerKtx.routeChanged().collect { handleRouteChanged(it) }
+            }
+            launch {
                 navigationManagerKtx.curves().collect {
                     handleCurve(it)
                 }
@@ -193,8 +196,16 @@ class DriveFragmentViewModel : ViewModel() {
         }
     }
 
+    private fun handleRouteChanged(route : Route?) {
+        route?.let {
+            mapDataModel.clearPrimaryRoute()
+            mapDataModel.setPrimaryRoute(route)
+        }
+    }
+
     private fun handlePosition(geoPosition: GeoPosition) {
         currentSpeedTextMutable.postValue(geoPosition.speed.toInt().toString())
+        println(geoPosition.speed.toInt().toString())
         if (geoPosition.speed > currentSpeedLimit + 5f) {
             currentSpeedColorMutable.postValue(Color.RED)
         } else {

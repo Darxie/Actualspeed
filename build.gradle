@@ -2,7 +2,7 @@
 buildscript {
     ext {
         kotlinVersion = "1.5.30"
-        sygicSdkVersion = '20.0.0-dev.1769'
+        sygicSdkVersion = '20.0.1'
         coroutinesVersion = "1.4.2"
     }
 
